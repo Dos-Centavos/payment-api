@@ -15,7 +15,10 @@ const User = new mongoose.Schema({
     type: String,
     required: true,
     unique: true
-  }
+  },
+  pearsonId: { type: String },
+  walletIndex: { type: Number, required: true, unique: true },
+  walletAddress: { type: String, required: true, unique: true }
 })
 
 // Before saving, convert the password to a hash.

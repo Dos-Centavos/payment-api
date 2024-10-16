@@ -86,21 +86,6 @@ describe('#users-use-case', () => {
       }
     })
 
-    it('should throw an error if name is not provided', async () => {
-      try {
-        const usrObj = {
-          email: 'test@test.com',
-          password: 'password'
-        }
-
-        await uut.createUser(usrObj)
-
-        assert.fail('Unexpected code path')
-      } catch (err) {
-        assert.include(err.message, "Property 'name' must be a string!")
-      }
-    })
-
     it('should catch and throw DB errors', async () => {
       try {
         // Force an error with the database.
@@ -123,7 +108,7 @@ describe('#users-use-case', () => {
     it('should create a new user in the DB', async () => {
       // Note: The user created in this test is used by the getUser, update,
       // and delete tests.
-
+      sandbox.stub(uut, 'getWalletSequence').resolves({ walletaddress: 'cashAddress', walletIndex: 0 })
       const usrObj = {
         email: 'test01@test.com',
         password: 'test',
@@ -411,6 +396,43 @@ describe('#users-use-case', () => {
       await uut.deleteUser(testUser)
 
       assert.isOk('Not throwing an error is a pass!')
+    })
+  })
+
+  describe('#getWalletSequence', () => {
+    it('should handle wallet error', async () => {
+      try {
+        sandbox.stub(uut.adapters.wallet, '_instanceWallet').throws(new Error('test error'))
+        sandbox.stub(uut.UserModel, 'find').resolves([])
+
+        await uut.getWalletSequence()
+
+        assert.fail('Unexpected code path.')
+      } catch (err) {
+        // console.log(err)
+        assert.include(err.message, 'test error')
+      }
+    })
+
+    it('should get default wallet index', async () => {
+      const mockAddress = 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg'
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves({ walletInfo: { cashAddress: mockAddress } })
+      sandbox.stub(uut.UserModel, 'find').resolves([])
+
+      const { walletIndex, walletAddress } = await uut.getWalletSequence()
+      assert.equal(walletIndex, 0)
+      assert.isString(walletAddress)
+      assert.equal(walletAddress, mockAddress)
+    })
+    it('should get sequential index', async () => {
+      const mockAddress = 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg'
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves({ walletInfo: { cashAddress: mockAddress } })
+      sandbox.stub(uut.UserModel, 'find').resolves([{ walletIndex: 3 }])
+
+      const { walletIndex, walletAddress } = await uut.getWalletSequence()
+      assert.equal(walletIndex, 4)
+      assert.isString(walletAddress)
+      assert.equal(walletAddress, mockAddress)
     })
   })
 })

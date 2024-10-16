@@ -31,7 +31,9 @@ describe('#User-Adapter', () => {
     testuser = new User({
       email: 'test983@test.com',
       name: 'test983',
-      password: 'password'
+      password: 'password',
+      walletIndex: 0,
+      walletAddress: 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg'
     })
   })
 

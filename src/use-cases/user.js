@@ -6,6 +6,7 @@
 import UserEntity from '../entities/user.js'
 
 import wlogger from '../adapters/wlogger.js'
+import config from '../../config/index.js'
 
 class UserLib {
   constructor (localConfig = {}) {
@@ -16,10 +17,12 @@ class UserLib {
         'Instance of adapters must be passed in when instantiating User Use Cases library.'
       )
     }
-
+    this.config = config
     // Encapsulate dependencies
     this.UserEntity = new UserEntity()
     this.UserModel = this.adapters.localdb.Users
+
+    this.getWalletSequence = this.getWalletSequence.bind(this)
   }
 
   // Create a new user model and add it to the Mongo database.
@@ -32,8 +35,10 @@ class UserLib {
 
       // Enforce default value of 'user'
       user.type = 'user'
-      // console.log('user: ', user)
 
+      const { walletAddress, walletIndex } = await this.getWalletSequence()
+      user.walletAddress = walletAddress
+      user.walletIndex = walletIndex
       // Save the new user model to the database.
       await user.save()
 
@@ -46,10 +51,10 @@ class UserLib {
 
       // Delete the password property.
       delete userData.password
-
+      console.log('userData ', userData)
       return { userData, token }
     } catch (err) {
-      // console.log('createUser() error: ', err)
+      console.log('createUser() error: ', err)
       wlogger.error('Error in lib/users.js/createUser()')
       throw err
     }
@@ -178,6 +183,33 @@ class UserLib {
       // console.error('Error in users.js/authUser()')
       console.log('')
       throw err
+    }
+  }
+
+  async getWalletSequence () {
+    try {
+      let walletIndex = 0
+
+      const users = await this.UserModel.find({})
+      const latUser = users[users.length - 1]
+      if (latUser) {
+        walletIndex = latUser.walletIndex + 1
+      }
+      const walletConfig = {
+        authPass: this.config.authPass,
+        restURL: this.config.apiServer,
+        hdPath: `m/44'/245'/0'/0/${walletIndex}`
+      }
+
+      const derivatedWallet = await this.adapters.wallet._instanceWallet(this.config.pearsonMnemonic, walletConfig)
+
+      return {
+        walletAddress: derivatedWallet.walletInfo.cashAddress,
+        walletIndex
+      }
+    } catch (error) {
+      console.log('Error on use-cases/user/getWalletSequence()', error)
+      throw error
     }
   }
 }
