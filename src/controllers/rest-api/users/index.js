@@ -55,6 +55,7 @@ class UserRouter {
     this.router.post('/', this.userRESTController.createUser)
     this.router.get('/', this.getAll)
     this.router.get('/:id', this.getById)
+    this.router.get('/address/:id', this.getUserAddressByPearsonId)
     this.router.put('/:id', this.updateUser)
     this.router.delete('/:id', this.deleteUser)
 
@@ -83,6 +84,10 @@ class UserRouter {
     await _this.validators.ensureTargetUserOrAdmin(ctx, next)
     await _this.userRESTController.getUser(ctx, next)
     await _this.userRESTController.deleteUser(ctx, next)
+  }
+
+  async getUserAddressByPearsonId (ctx, next) {
+    await _this.userRESTController.getUserAddressByPearsonId(ctx, next)
   }
 }
 

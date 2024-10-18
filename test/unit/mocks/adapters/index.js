@@ -74,5 +74,9 @@ const localdb = {
     return true
   }
 }
+class Wallet {
+  constructor(){}
+  _instanceWallet(){}
+}
 
-export default { ipfs, localdb };
+export default { ipfs, localdb , wallet:new Wallet() };

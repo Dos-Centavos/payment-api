@@ -71,3 +71,6 @@ run-dev.sh
 !README.md
 
 wallet.json
+
+start-dev.sh
+sync-dev.sh

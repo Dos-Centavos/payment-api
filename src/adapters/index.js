@@ -18,6 +18,8 @@ import JSONFiles from './json-files.js'
 import FullStackJWT from './fullstack-jwt.js'
 import config from '../../config/index.js'
 import Wallet from './wallet.adapter.js'
+import ZMQ from './zmq.js'
+import TokenTiger from './token-tiger.js'
 
 class Adapters {
   constructor (localConfig = {}) {
@@ -31,6 +33,8 @@ class Adapters {
     this.bchjs = new BCHJS()
     this.config = config
     this.wallet = new Wallet(localConfig)
+    this.zmq = new ZMQ({ config, localdb: this.localdb })
+    this.tokenTiger = new TokenTiger({ config })
 
     // Get a valid JWT API key and instance bch-js.
     this.fullStackJwt = new FullStackJWT(config)
@@ -64,6 +68,12 @@ class Adapters {
         // These lines are here to ensure code coverage hits 100%.
         console.log('Not starting IPFS node since this is an e2e test.')
       }
+
+      // Start ZMQ connection
+      this.zmq.connect()
+
+      // Token tiger Auth
+      await this.tokenTiger.auth()
 
       console.log('Async Adapters have been started.')
 
