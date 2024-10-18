@@ -27,7 +27,8 @@ class TimerControllers {
     this.config = config
 
     // Bind 'this' object to all subfunctions.
-    this.exampleTimerFunc = this.exampleTimerFunc.bind(this)
+    this.reviewPayments = this.reviewPayments.bind(this)
+    this.reviewTime = 30000 // 30seg
 
     // this.startTimers()
   }
@@ -36,25 +37,30 @@ class TimerControllers {
   startTimers () {
     // Any new timer control functions can be added here. They will be started
     // when the server starts.
-    this.optimizeWalletHandle = setInterval(this.exampleTimerFunc, 60000 * 10)
+    this.reviewPaymentTimer = setInterval(this.reviewPayments, this.reviewTime)
 
     return true
   }
 
   stopTimers () {
-    clearInterval(this.optimizeWalletHandle)
+    clearInterval(this.reviewPaymentTimer)
   }
 
   // Replace this example function with your own timer handler.
-  exampleTimerFunc (negativeTest) {
+  async reviewPayments () {
     try {
-      console.log('Example timer controller executed.')
+      clearInterval(this.reviewPaymentTimer)
 
-      if (negativeTest) throw new Error('test error')
-
+      await this.useCases.user.reviewPayments()
+      /**
+       * Proccess payments
+       *
+       */
+      this.reviewPaymentTimer = setInterval(this.reviewPayments, this.reviewTime)
       return true
     } catch (err) {
-      console.error('Error in exampleTimerFunc(): ', err)
+      console.error('Error in reviewPayment(): ', err)
+      this.reviewPaymentTimer = setInterval(this.reviewPayments, this.reviewTime)
 
       // Note: Do not throw an error. This is a top-level function.
       return false

@@ -16,9 +16,11 @@ const User = new mongoose.Schema({
     required: true,
     unique: true
   },
-  pearsonId: { type: String },
-  walletIndex: { type: Number, required: true, unique: true },
-  walletAddress: { type: String, required: true, unique: true }
+  pearsonId: { type: String }, // pearson-api user id.
+  walletIndex: { type: Number, required: true, unique: true }, // wallet index derivation
+  walletAddress: { type: String, required: true, unique: true }, // wallet address
+  lastPaymentTime: { type: Number, default: 0 }, // Timestamp of the last payment detected.
+  lastReviewTime: { type: Number, default: 0 } // Timestamp of the last payment review.
 })
 
 // Before saving, convert the password to a hash.

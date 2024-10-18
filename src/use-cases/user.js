@@ -22,7 +22,9 @@ class UserLib {
     this.UserEntity = new UserEntity()
     this.UserModel = this.adapters.localdb.Users
 
+    // Bind functions.
     this.getWalletSequence = this.getWalletSequence.bind(this)
+    this.reviewPayments = this.reviewPayments.bind(this)
   }
 
   // Create a new user model and add it to the Mongo database.
@@ -36,6 +38,7 @@ class UserLib {
       // Enforce default value of 'user'
       user.type = 'user'
 
+      // Assign derivated wallet
       const { walletAddress, walletIndex } = await this.getWalletSequence()
       user.walletAddress = walletAddress
       user.walletIndex = walletIndex
@@ -186,6 +189,7 @@ class UserLib {
     }
   }
 
+  // Obtain the following sequence of the derivation of wallets assigned to users
   async getWalletSequence () {
     try {
       let walletIndex = 0
@@ -201,7 +205,10 @@ class UserLib {
         hdPath: `m/44'/245'/0'/0/${walletIndex}`
       }
 
-      const derivatedWallet = await this.adapters.wallet._instanceWallet(this.config.pearsonMnemonic, walletConfig)
+      const derivatedWallet = await this.adapters.wallet._instanceWallet(
+        this.config.pearsonMnemonic,
+        walletConfig
+      )
 
       return {
         walletAddress: derivatedWallet.walletInfo.cashAddress,
@@ -209,6 +216,57 @@ class UserLib {
       }
     } catch (error) {
       console.log('Error on use-cases/user/getWalletSequence()', error)
+      throw error
+    }
+  }
+
+  // Gets the wallet address of a user searched for the pearsonId.
+  async getUserAddressByPearsonId ({ id }) {
+    try {
+      const user = await this.UserModel.findOne({ pearsonId: id })
+      if (!user) {
+        throw new Error('user not found!')
+      }
+
+      return user.walletAddress
+    } catch (error) {
+      console.log('Error on use-cases/user/getWalletSequence()', error)
+      throw error
+    }
+  }
+
+  // Control pending user payments.
+  // Once the date of a detected payment is greater than the date of the last review, it will proceed to review the user's balance.
+  async reviewPayments () {
+    try {
+      // Fetch user to review payment in the last 1 minutes.
+      const users = await this.UserModel.find()
+
+      // Filter users who need payment review.
+      const usersToReview = users.filter((val) => {
+        return val.lastPaymentTime > val.lastReviewTime
+      })
+      console.log('users to review payment', usersToReview)
+      for (let i = 0; i < usersToReview.length; i++) {
+        try {
+          const user = usersToReview[i]
+          /**
+           * TODO :  Process and validate the balance before sending credits to the user.
+           */
+          await this.adapters.tokenTiger.addCredits({
+            qty: 1,
+            userId: user.pearsonId
+          })
+
+          // Save the timestamp of the last payment processed
+          user.lastReviewTime = new Date().getTime()
+          await user.save()
+        } catch (error) {
+          continue
+        }
+      }
+    } catch (error) {
+      console.log('Error on use-cases/user/reviewPayment()')
       throw error
     }
   }

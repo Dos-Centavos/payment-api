@@ -152,8 +152,14 @@ export default {
 
   // END IPFS CONFIGURATION
 
-  // Pearson Data
+  // Pearson-api Data
+  pearsonMnemonic: process.env.PEARSON_MNEMONIC ? process.env.PEARSON_MNEMONIC : '',
+  pearsonApiUrl: process.env.PEARSON_API_URL ? process.env.PEARSON_API_URL : 'http://localhost:5001',
+  pearsonAuthEmail: process.env.PEARSON_AUTH_EMAIL ? process.env.PEARSON_AUTH_EMAIL : '',
+  pearsonAuthPass: process.env.PEARSON_AUTH_PASS ? process.env.PEARSON_AUTH_PASS : '',
 
-  pearsonMnemonic: process.env.PEARSON_MNEMONIC ? process.env.PEARSON_MNEMONIC : 'paddle sun average similar danger gown check aim bring unusual autumn dress'
+  // ZMQ
+  zmqIp: process.env.ZMQIP ? process.env.ZMQIP : '',
+  zmqPort: process.env.ZMQPORT ? process.env.ZMQPORT : ''
 
 }

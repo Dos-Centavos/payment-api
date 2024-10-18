@@ -37,6 +37,7 @@
     "@libp2p/webrtc": "4.1.7",
     "@libp2p/websockets": "8.2.0",
     "@multiformats/multiaddr": "12.3.0",
+    "@psf/bitcoincash-zmq-decoder": "^0.1.5",
     "axios": "0.27.2",
     "bcryptjs": "2.4.3",
     "blockstore-fs": "2.0.0",
@@ -67,7 +68,8 @@
     "passport-local": "1.0.0",
     "public-ip": "6.0.1",
     "winston": "3.3.3",
-    "winston-daily-rotate-file": "4.5.0"
+    "winston-daily-rotate-file": "4.5.0",
+    "zeromq": "^6.0.8"
   },
   "devDependencies": {
     "apidoc": "0.51.1",
