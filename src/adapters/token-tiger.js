@@ -5,14 +5,20 @@ import axios from 'axios'
 class TokenTiger {
   constructor (localConfig = {}) {
     // Encapsulate dependencies
-    this.config = localConfig.config
+    this.config = localConfig
+    this.axios = axios
 
+    if (!this.config.pearsonApiUrl || typeof this.config.pearsonApiUrl !== 'string') {
+      throw new Error(
+        'Must pass a url for the Token Tiger AUTH server when instantiating TokenTiger class.'
+      )
+    }
     // Bind functions
     this.auth = this.auth.bind(this)
     this.addCredits = this.addCredits.bind(this)
   }
 
-  // tokentiger.com auth
+  // tokentiger auth
   async auth () {
     try {
       const options = {
@@ -24,19 +30,26 @@ class TokenTiger {
         }
       }
 
-      const result = await axios(options)
+      const result = await this.axios.request(options)
       const data = result.data
       this.jwt = data.token
       return data.token
     } catch (error) {
-      console.log(error.message)
+      console.log('Error in token-tiger/auth()')
       throw error
     }
   }
 
   // Adds credits to a tokentiger user
-  async addCredits ({ qty, userId }) {
+  async addCredits (inObj = {}) {
     try {
+      const { qty, userId } = inObj
+      if (!qty) {
+        throw new Error('qty is required')
+      }
+      if (!userId) {
+        throw new Error('userId is required')
+      }
       const options = {
         method: 'post',
         url: `${this.config.pearsonApiUrl}/users/credit/add`,
@@ -49,10 +62,11 @@ class TokenTiger {
           userId
         }
       }
-      const result = await axios(options)
+      const result = await this.axios.request(options)
       const data = result.data
       return data
     } catch (error) {
+      console.log('Error in token-tiger/addCredits()')
       throw error
     }
   }

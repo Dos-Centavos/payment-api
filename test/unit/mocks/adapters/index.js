@@ -3,26 +3,26 @@
 */
 
 class IpfsAdapter {
-  constructor () {
+  constructor() {
     this.ipfs = {
       files: {
-        stat: () => {}
+        stat: () => { }
       }
     }
   }
 }
 
 class IpfsCoordAdapter {
-  constructor () {
+  constructor() {
     this.ipfsCoord = {
       adapters: {
         ipfs: {
-          connectToPeer: async () => {}
+          connectToPeer: async () => { }
         }
       },
       useCases: {
         peer: {
-          sendPrivateMessage: () => {}
+          sendPrivateMessage: () => { }
         }
       },
       thisNode: {}
@@ -33,39 +33,39 @@ class IpfsCoordAdapter {
 const ipfs = {
   ipfsAdapter: new IpfsAdapter(),
   ipfsCoordAdapter: new IpfsCoordAdapter(),
-  getStatus: async () => {},
-  getPeers: async () => {},
-  getRelays: async () => {}
+  getStatus: async () => { },
+  getPeers: async () => { },
+  getRelays: async () => { }
 }
 ipfs.ipfs = ipfs.ipfsAdapter.ipfs
 
 const localdb = {
   Users: class Users {
-    static findById () {}
-    static find () {}
-    static findOne () {
+    static findById() { }
+    static find() { }
+    static findOne() {
       return {
         validatePassword: localdb.validatePassword
       }
     }
 
-    async save () {
+    async save() {
       return {}
     }
 
-    generateToken () {
+    generateToken() {
       return '123'
     }
 
-    toJSON () {
+    toJSON() {
       return {}
     }
 
-    async remove () {
+    async remove() {
       return true
     }
 
-    async validatePassword () {
+    async validatePassword() {
       return true
     }
   },
@@ -75,8 +75,17 @@ const localdb = {
   }
 }
 class Wallet {
-  constructor(){}
-  _instanceWallet(){}
+  constructor() { }
+  _instanceWallet() { }
+}
+class TokenTiger {
+  constructor() { }
+  addCredits() { }
 }
 
-export default { ipfs, localdb , wallet:new Wallet() };
+export default {
+  ipfs,
+  localdb,
+  wallet: new Wallet(),
+  tokenTiger : new TokenTiger()
+};

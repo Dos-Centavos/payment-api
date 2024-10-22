@@ -273,7 +273,7 @@ class UserRESTControllerLib {
    * @apiGroup REST Users
    *
    * @apiExample Example usage:
-   * curl -H "Content-Type: application/json" -X GET localhost:5010/users/56bd1da600a526986cf65c80
+   * curl -H "Content-Type: application/json" -X GET localhost:5010/users/address/56bd1da600a526986cf65c80
 
    * @apiSuccessExample {json} Success-Response:
    *     HTTP/1.1 200 OK
@@ -284,7 +284,7 @@ class UserRESTControllerLib {
    * @apiUse TokenError
    */
 
-  async getUserAddressByPearsonId (ctx, next) {
+  async getUserAddressByPearsonId (ctx) {
     try {
       const address = await _this.useCases.user.getUserAddressByPearsonId(ctx.params)
 
@@ -293,10 +293,6 @@ class UserRESTControllerLib {
       }
     } catch (err) {
       _this.handleError(ctx, err)
-    }
-
-    if (next) {
-      return next()
     }
   }
 

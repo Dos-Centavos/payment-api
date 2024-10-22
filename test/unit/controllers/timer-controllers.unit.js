@@ -66,15 +66,17 @@ describe('#Timer-Controllers', () => {
     })
   })
 
-  describe('#exampleTimerFunc', () => {
-    it('should kick off the Use Case', async () => {
-      const result = await uut.exampleTimerFunc()
+  describe('#reviewPayments', () => {
+    it('should kick off the payment review', async () => {
+      sandbox.stub(uut.useCases.user, 'reviewPayments').resolves()
+      const result = await uut.reviewPayments()
 
       assert.equal(result, true)
     })
 
     it('should return false on error', async () => {
-      const result = await uut.exampleTimerFunc(true)
+      sandbox.stub(uut.useCases.user, 'reviewPayments').throws()
+      const result = await uut.reviewPayments(true)
 
       assert.equal(result, false)
     })

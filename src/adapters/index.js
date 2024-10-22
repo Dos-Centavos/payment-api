@@ -34,7 +34,7 @@ class Adapters {
     this.config = config
     this.wallet = new Wallet(localConfig)
     this.zmq = new ZMQ({ config, localdb: this.localdb })
-    this.tokenTiger = new TokenTiger({ config })
+    this.tokenTiger = new TokenTiger(config)
 
     // Get a valid JWT API key and instance bch-js.
     this.fullStackJwt = new FullStackJWT(config)
@@ -54,7 +54,9 @@ class Adapters {
       // Create a default instance of minimal-slp-wallet without initializing it
       // (without retrieving the wallets UTXOs). This instance will be overwritten
       // if the operator has configured BCH payments.
-      console.log('\nCreating default startup wallet. This wallet may be overwritten.')
+      console.log(
+        '\nCreating default startup wallet. This wallet may be overwritten.'
+      )
       await this.wallet.instanceWalletWithoutInitialization({}, { apiToken })
       this.bchjs = this.wallet.bchWallet.bchjs
 
@@ -72,8 +74,15 @@ class Adapters {
       // Start ZMQ connection
       this.zmq.connect()
 
-      // Token tiger Auth
-      await this.tokenTiger.auth()
+      // TokenTiger Auth
+      // Start the IPFS node.
+      // Do not start these adapters if this is an e2e test.
+      if (this.config.env !== 'test') {
+        await this.tokenTiger.auth()
+      } else {
+        // These lines are here to ensure code coverage hits 100%.
+        console.log('Not TokenTiger auth since this is an e2e test.')
+      }
 
       console.log('Async Adapters have been started.')
 

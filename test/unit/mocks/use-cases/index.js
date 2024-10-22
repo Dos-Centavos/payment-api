@@ -29,6 +29,12 @@ class UserUseCaseMock {
       generateToken: () => {}
     }
   }
+  async reviewPayments(){
+    return true
+  }
+  async getUserAddressByPearsonId(){
+    return true
+  }
 }
 
 class UseCasesMock {

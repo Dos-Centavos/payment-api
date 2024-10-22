@@ -26,9 +26,7 @@ class ZMQ {
     this.connect = this.connect.bind(this)
     this.disconnect = this.disconnect.bind(this)
     this.decodeMsg = this.decodeMsg.bind(this)
-    this.getTx = this.getTx.bind(this)
-    this.getBlock = this.getBlock.bind(this)
-    this.getOutputAddresses = this.getOutputAddresses.bind(this)
+    this.reviewOutputAddresses = this.reviewOutputAddresses.bind(this)
   }
 
   // Connect to the ZMQ port of the full node.
@@ -51,6 +49,7 @@ class ZMQ {
   disconnect () {
     // this.sock.disconnect(`tcp://${this.config.rpcIp}:${this.config.zmqPort}`)
     this.sock.close()
+    return true
   }
 
   // Decode message coming through ZMQ connection.
@@ -64,7 +63,7 @@ class ZMQ {
 
         const txd = this.bchZmqDecoder.decodeTransaction(message)
         // console.log(`txd: ${JSON.stringify(txd, null, 2)}`)
-        this.getOutputAddresses(txd)
+        this.reviewOutputAddresses(txd)
         this.txQueue.push(txd.format.txid)
       } else if (decoded === 'rawblock') {
         // Process new blocks
@@ -83,42 +82,35 @@ class ZMQ {
     }
   }
 
-  // Get the next TX in the queue
-  getTx () {
-    // console.log(`this.txQueue.length: ${this.txQueue.length}`)
-    let nextTx = this.txQueue.shift()
-    // console.log(`nextTx: ${JSON.stringify(nextTx, null, 2)}`)
-
-    if (nextTx === undefined) nextTx = false
-
-    return nextTx
-  }
-
-  // Get the next block in the queue
-  getBlock () {
-    // console.log(`this.blockQueue.length: ${this.blockQueue.length}`)
-    let nextBlock = this.blockQueue.shift()
-
-    if (nextBlock === undefined) nextBlock = false
-
-    return nextBlock
-  }
-
   // Checks if the addresses of the output of a transaction match
   // with an address registered in the database.
   // If a registered address is detected, a timestamp is saved
-  async getOutputAddresses (tx) {
-    const out = tx.outputs
-    for (let i = 0; i < out.length; i++) {
-      const outp = out[i]
-      // console.log(outp.scriptPubKey.addresses)
-      const addresses = outp.scriptPubKey.addresses
-      for (let j = 0; j < addresses.length; j++) {
-        const legacy = addresses[j]
-        if (!legacy) continue
-        const cashAddr = this.wallet.bchjs.Address.toCashAddress(legacy)
-        await this.reviewAddress(cashAddr)
+  async reviewOutputAddresses (tx) {
+    try {
+      const out = tx.outputs
+      // Map outputs
+      for (let i = 0; i < out.length; i++) {
+        const outp = out[i]
+        // console.log(outp.scriptPubKey.addresses)
+        const addresses = outp.scriptPubKey.addresses
+        // Map addresses
+        for (let j = 0; j < addresses.length; j++) {
+          const legacy = addresses[j]
+          let cashAddr
+          try {
+            // Try to turn output address( legacy format ) to cash address.
+            cashAddr = this.wallet.bchjs.Address.toCashAddress(legacy)
+          } catch (error) {
+            continue
+          }
+          // Review cash address
+          await this.reviewAddress(cashAddr)
+        }
       }
+      return true
+    } catch (err) {
+      console.error('Error in reviewOutputAddresses: ', err)
+      return false
     }
   }
 
@@ -128,7 +120,7 @@ class ZMQ {
     try {
       const user = await this.localdb.Users.findOne({ walletAddress: addr })
       if (!user) {
-        return
+        return false
       }
 
       user.lastPaymentTime = new Date().getTime()
@@ -136,8 +128,10 @@ class ZMQ {
       await user.save()
 
       console.log(`user payment receive ${user.email}`)
+      return user
     } catch (err) {
       console.error('Error in reviewAddress: ', err)
+      return false
     }
   }
 }

@@ -221,8 +221,11 @@ class UserLib {
   }
 
   // Gets the wallet address of a user searched for the pearsonId.
-  async getUserAddressByPearsonId ({ id }) {
+  async getUserAddressByPearsonId (inObj = {}) {
     try {
+      const { id } = inObj
+      if (!id || typeof id !== 'string') throw new Error('id must be a string')
+
       const user = await this.UserModel.findOne({ pearsonId: id })
       if (!user) {
         throw new Error('user not found!')
@@ -265,6 +268,7 @@ class UserLib {
           continue
         }
       }
+      return true
     } catch (error) {
       console.log('Error on use-cases/user/reviewPayment()')
       throw error

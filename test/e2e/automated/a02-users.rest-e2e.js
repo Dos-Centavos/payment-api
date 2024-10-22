@@ -152,7 +152,8 @@ if (!config.noMongo) {
             data: {
               user: {
                 email: 'test3@test.com',
-                password: 'supersecretpassword'
+                password: 'supersecretpassword',
+                pearsonId: 'user-pearson-api-id'
               }
             }
           }
@@ -387,6 +388,25 @@ if (!config.noMongo) {
           'password',
           'Password property should not be returned'
         )
+      })
+    })
+
+    describe('GET /users/address/:id', () => {
+      it('should fetch user address', async () => {
+        const pearsonId = context.user.pearsonId
+        const options = {
+          method: 'GET',
+          url: `${LOCALHOST}/users/address/${pearsonId}`,
+          headers: {
+            Accept: 'application/json'
+          }
+        }
+        const result = await axios(options)
+
+        const address = result.data.address
+        // console.log(`user: ${util.inspect(user)}`)
+
+        assert.isString(address)
       })
     })
 

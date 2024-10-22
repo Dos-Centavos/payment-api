@@ -46,7 +46,7 @@ class TimerControllers {
     clearInterval(this.reviewPaymentTimer)
   }
 
-  // Replace this example function with your own timer handler.
+  // Review all payment that need it
   async reviewPayments () {
     try {
       clearInterval(this.reviewPaymentTimer)
