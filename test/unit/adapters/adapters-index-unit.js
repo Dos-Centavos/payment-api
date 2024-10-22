@@ -32,6 +32,7 @@ describe('#adapters', () => {
       sandbox.stub(uut.fullStackJwt, 'getJWT').resolves()
       sandbox.stub(uut.fullStackJwt, 'instanceBchjs').resolves()
       sandbox.stub(uut.ipfs, 'start').resolves()
+      sandbox.stub(uut.tokenTiger, 'auth').resolves()
 
       const result = await uut.start()
 

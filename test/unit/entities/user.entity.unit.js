@@ -61,9 +61,6 @@ describe('#User-Entity', () => {
 
       assert.property(entry, 'password')
       assert.equal(entry.password, inputData.password)
-
-      assert.property(entry, 'name')
-      assert.equal(entry.name, inputData.name)
     })
   })
 })

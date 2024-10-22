@@ -148,7 +148,18 @@ export default {
 
     // v2 Circuit Relay server (FullStack.cash)
     // '/ip4/78.46.129.7/tcp/4001/p2p/12D3KooWFQ11GQ5NubsJGhYZ4X3wrAGimLevxfm6HPExCrMYhpSL'
-  ]
+  ],
 
   // END IPFS CONFIGURATION
+
+  // Pearson-api Data
+  pearsonMnemonic: process.env.PEARSON_MNEMONIC ? process.env.PEARSON_MNEMONIC : '',
+  pearsonApiUrl: process.env.PEARSON_API_URL ? process.env.PEARSON_API_URL : 'http://localhost:5001',
+  pearsonAuthEmail: process.env.PEARSON_AUTH_EMAIL ? process.env.PEARSON_AUTH_EMAIL : '',
+  pearsonAuthPass: process.env.PEARSON_AUTH_PASS ? process.env.PEARSON_AUTH_PASS : '',
+
+  // ZMQ
+  zmqIp: process.env.ZMQIP ? process.env.ZMQIP : '',
+  zmqPort: process.env.ZMQPORT ? process.env.ZMQPORT : ''
+
 }
