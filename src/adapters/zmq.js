@@ -91,6 +91,7 @@ class ZMQ {
       // Map outputs
       for (let i = 0; i < out.length; i++) {
         const outp = out[i]
+
         // console.log(outp.scriptPubKey.addresses)
         const addresses = outp.scriptPubKey.addresses
         // Map addresses
@@ -104,7 +105,7 @@ class ZMQ {
             continue
           }
           // Review cash address
-          await this.reviewAddress(cashAddr)
+          await this.reviewAddress(cashAddr, tx)
         }
       }
       return true
@@ -116,7 +117,7 @@ class ZMQ {
 
   // Checks if the address provided belongs to a registered user
   // If this is the case, then saves a timestamp to the user model.
-  async reviewAddress (addr) {
+  async reviewAddress (addr, tx) {
     try {
       const user = await this.localdb.Users.findOne({ walletAddress: addr })
       if (!user) {

@@ -260,7 +260,7 @@ describe('#Users-REST-Controller', () => {
 
     it('should return 200 status on success', async () => {
       // Mock dependencies
-      sandbox.stub(uut.useCases.user, 'getUserAddressByPearsonId').resolves({ _id: '123', walletAddress: 'address' })
+      sandbox.stub(uut.useCases.user, 'getUserAddressByPearsonId').resolves({ address: 'user address ' })
 
       await uut.getUserAddressByPearsonId(ctx)
 
@@ -268,7 +268,8 @@ describe('#Users-REST-Controller', () => {
       assert.equal(ctx.status, 200)
 
       // Assert that expected properties exist in the returned data.
-      assert.property(ctx.response.body, 'address')
+      assert.property(ctx.response.body, 'data')
+      assert.property(ctx.response.body.data, 'address')
     })
 
     it('should return other error status passed by biz logic', async () => {

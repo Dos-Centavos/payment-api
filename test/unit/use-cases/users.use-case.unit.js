@@ -437,31 +437,6 @@ describe('#users-use-case', () => {
   })
 
   describe('#getUserAddressByPearsonId', () => {
-    it('should handle error', async () => {
-      try {
-        sandbox.stub(uut.UserModel, 'findOne').resolves(null)
-        const inObj = { id: 'id' }
-        await uut.getUserAddressByPearsonId(inObj)
-
-        assert.fail('Unexpected code path.')
-      } catch (err) {
-        // console.log(err)
-        assert.include(err.message, 'user not found!')
-      }
-    })
-
-    it('should return user address', async () => {
-      sandbox.stub(uut.UserModel, 'findOne').resolves({ walletAddress: 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg' })
-
-      const inObj = { id: 'id' }
-      const result = await uut.getUserAddressByPearsonId(inObj)
-
-      assert.isString(result)
-      assert.equal(result, 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg')
-    })
-  })
-
-  describe('#getUserAddressByPearsonId', () => {
     it('should handle error if input is missing', async () => {
       try {
         const inObj = {}
@@ -492,8 +467,12 @@ describe('#users-use-case', () => {
       const inObj = { id: 'id' }
       const result = await uut.getUserAddressByPearsonId(inObj)
 
-      assert.isString(result)
-      assert.equal(result, 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg')
+      assert.isObject(result)
+      assert.property(result, 'address')
+      assert.property(result, 'lastPaymentTime')
+      assert.property(result, 'lastReviewTime')
+
+      assert.equal(result.address, 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg')
     })
   })
 

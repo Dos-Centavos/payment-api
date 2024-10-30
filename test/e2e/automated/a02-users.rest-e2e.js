@@ -403,10 +403,11 @@ if (!config.noMongo) {
         }
         const result = await axios(options)
 
-        const address = result.data.address
+        const addressData = result.data
         // console.log(`user: ${util.inspect(user)}`)
 
-        assert.isString(address)
+        assert.isObject(addressData.data)
+        assert.isString(addressData.data.address)
       })
     })
 

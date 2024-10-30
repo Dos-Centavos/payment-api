@@ -277,19 +277,21 @@ class UserRESTControllerLib {
 
    * @apiSuccessExample {json} Success-Response:
    *     HTTP/1.1 200 OK
-   *     {
-   *       "address":  "bitcoincash:qrw05p575ggezh7nw2ld30kmn5pdmg4pwcswxrnypz"
-   *     }
+   *     data : {
+   *       "address":  "bitcoincash:qrw05p575ggezh7nw2ld30kmn5pdmg4pwcswxrnypz",
+   *       "lastPaymentTime":  12345678,
+   *       "lastReviewTime":  12345678
+   *       }
    *
    * @apiUse TokenError
    */
 
   async getUserAddressByPearsonId (ctx) {
     try {
-      const address = await _this.useCases.user.getUserAddressByPearsonId(ctx.params)
+      const data = await _this.useCases.user.getUserAddressByPearsonId(ctx.params)
 
       ctx.body = {
-        address
+        data
       }
     } catch (err) {
       _this.handleError(ctx, err)

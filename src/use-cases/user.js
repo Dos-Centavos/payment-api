@@ -231,7 +231,12 @@ class UserLib {
         throw new Error('user not found!')
       }
 
-      return user.walletAddress
+      const data = {
+        address: user.walletAddress,
+        lastPaymentTime: user.lastPaymentTime,
+        lastReviewTime: user.lastReviewTime
+      }
+      return data
     } catch (error) {
       console.log('Error on use-cases/user/getWalletSequence()', error)
       throw error
