@@ -26,6 +26,8 @@ class UserRESTControllerLib {
     this.UserModel = this.adapters.localdb.Users
     // this.userUseCases = this.useCases.user
 
+    this.getUserAddressByPearsonId = this.getUserAddressByPearsonId.bind(this)
+
     _this = this
   }
 
@@ -262,6 +264,37 @@ class UserRESTControllerLib {
       }
     } catch (err) {
       ctx.throw(422, err.message)
+    }
+  }
+
+  /**
+   * @api {get} /users/address/:id Get user address by pearsonId.
+   * @apiName GetUser
+   * @apiGroup REST Users
+   *
+   * @apiExample Example usage:
+   * curl -H "Content-Type: application/json" -X GET localhost:5010/users/address/56bd1da600a526986cf65c80
+
+   * @apiSuccessExample {json} Success-Response:
+   *     HTTP/1.1 200 OK
+   *     data : {
+   *       "address":  "bitcoincash:qrw05p575ggezh7nw2ld30kmn5pdmg4pwcswxrnypz",
+   *       "lastPaymentTime":  12345678,
+   *       "lastReviewTime":  12345678
+   *       }
+   *
+   * @apiUse TokenError
+   */
+
+  async getUserAddressByPearsonId (ctx) {
+    try {
+      const data = await _this.useCases.user.getUserAddressByPearsonId(ctx.params)
+
+      ctx.body = {
+        data
+      }
+    } catch (err) {
+      _this.handleError(ctx, err)
     }
   }
 

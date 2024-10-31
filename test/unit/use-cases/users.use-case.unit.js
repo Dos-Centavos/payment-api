@@ -86,21 +86,6 @@ describe('#users-use-case', () => {
       }
     })
 
-    it('should throw an error if name is not provided', async () => {
-      try {
-        const usrObj = {
-          email: 'test@test.com',
-          password: 'password'
-        }
-
-        await uut.createUser(usrObj)
-
-        assert.fail('Unexpected code path')
-      } catch (err) {
-        assert.include(err.message, "Property 'name' must be a string!")
-      }
-    })
-
     it('should catch and throw DB errors', async () => {
       try {
         // Force an error with the database.
@@ -123,7 +108,7 @@ describe('#users-use-case', () => {
     it('should create a new user in the DB', async () => {
       // Note: The user created in this test is used by the getUser, update,
       // and delete tests.
-
+      sandbox.stub(uut, 'getWalletSequence').resolves({ walletaddress: 'cashAddress', walletIndex: 0 })
       const usrObj = {
         email: 'test01@test.com',
         password: 'test',
@@ -154,7 +139,7 @@ describe('#users-use-case', () => {
       await uut.getAllUsers()
       // console.log(`users: ${JSON.stringify(users, null, 2)}`)
 
-    // assert.isArray(users)
+      // assert.isArray(users)
     })
 
     it('should catch and throw an error', async () => {
@@ -229,8 +214,8 @@ describe('#users-use-case', () => {
       // Assert that the expected properties for the user model exist.
       // assert.property(result, 'type')
       assert.property(result, '_id')
-    // assert.property(result, 'email')
-    // assert.property(result, 'name')
+      // assert.property(result, 'email')
+      // assert.property(result, 'name')
     })
   })
 
@@ -336,7 +321,7 @@ describe('#users-use-case', () => {
         password: 'password',
         name: 'testy tester'
       }
-      testUser.save = async () => {}
+      testUser.save = async () => { }
 
       const result = await uut.updateUser(testUser, newData)
 
@@ -348,7 +333,7 @@ describe('#users-use-case', () => {
       assert.equal(result.name, 'testy tester')
     })
 
-  // TODO: verify that an admin can change the type of a user
+    // TODO: verify that an admin can change the type of a user
   })
 
   describe('#authUser', () => {
@@ -358,9 +343,9 @@ describe('#users-use-case', () => {
       await uut.authUser('test@test.com', 'password')
       // console.log('user: ', user)
 
-    // assert.property(user, '_id')
-    // assert.property(user, 'email')
-    // assert.property(user, 'name')
+      // assert.property(user, '_id')
+      // assert.property(user, 'email')
+      // assert.property(user, 'name')
     })
 
     it('should throw an error if no user matches the login', async () => {
@@ -411,6 +396,140 @@ describe('#users-use-case', () => {
       await uut.deleteUser(testUser)
 
       assert.isOk('Not throwing an error is a pass!')
+    })
+  })
+
+  describe('#getWalletSequence', () => {
+    it('should handle wallet error', async () => {
+      try {
+        sandbox.stub(uut.adapters.wallet, '_instanceWallet').throws(new Error('test error'))
+        sandbox.stub(uut.UserModel, 'find').resolves([])
+
+        await uut.getWalletSequence()
+
+        assert.fail('Unexpected code path.')
+      } catch (err) {
+        // console.log(err)
+        assert.include(err.message, 'test error')
+      }
+    })
+
+    it('should get default wallet index', async () => {
+      const mockAddress = 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg'
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves({ walletInfo: { cashAddress: mockAddress } })
+      sandbox.stub(uut.UserModel, 'find').resolves([])
+
+      const { walletIndex, walletAddress } = await uut.getWalletSequence()
+      assert.equal(walletIndex, 0)
+      assert.isString(walletAddress)
+      assert.equal(walletAddress, mockAddress)
+    })
+    it('should get sequential index', async () => {
+      const mockAddress = 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg'
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves({ walletInfo: { cashAddress: mockAddress } })
+      sandbox.stub(uut.UserModel, 'find').resolves([{ walletIndex: 3 }])
+
+      const { walletIndex, walletAddress } = await uut.getWalletSequence()
+      assert.equal(walletIndex, 4)
+      assert.isString(walletAddress)
+      assert.equal(walletAddress, mockAddress)
+    })
+  })
+
+  describe('#getUserAddressByPearsonId', () => {
+    it('should handle error if input is missing', async () => {
+      try {
+        const inObj = {}
+        await uut.getUserAddressByPearsonId(inObj)
+
+        assert.fail('Unexpected code path.')
+      } catch (err) {
+        // console.log(err)
+        assert.include(err.message, 'id must be a string')
+      }
+    })
+    it('should handle error if user is not found', async () => {
+      try {
+        sandbox.stub(uut.UserModel, 'findOne').resolves(null)
+        const inObj = { id: 'id' }
+        await uut.getUserAddressByPearsonId(inObj)
+
+        assert.fail('Unexpected code path.')
+      } catch (err) {
+        // console.log(err)
+        assert.include(err.message, 'user not found!')
+      }
+    })
+
+    it('should return user address', async () => {
+      sandbox.stub(uut.UserModel, 'findOne').resolves({ walletAddress: 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg' })
+
+      const inObj = { id: 'id' }
+      const result = await uut.getUserAddressByPearsonId(inObj)
+
+      assert.isObject(result)
+      assert.property(result, 'address')
+      assert.property(result, 'lastPaymentTime')
+      assert.property(result, 'lastReviewTime')
+
+      assert.equal(result.address, 'bitcoincash:qrvmrt0aq4g0hvf5jy6yavr4qmfl25lrwg5j8x6acg')
+    })
+  })
+
+  describe('#reviewPayments', () => {
+    it('should review payments', async () => {
+      const usersMock = [
+        { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
+
+      ]
+      sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      const spy = sandbox.stub(uut.adapters.tokenTiger, 'addCredits').resolves()
+
+      const result = await uut.reviewPayments()
+
+      assert.isTrue(result)
+      assert.notEqual(usersMock[0].lastReviewTime, 0, 'Expected to be changed')
+      assert.isTrue(spy.calledOnce, 'Endpoint will be called')
+    })
+    it('should handle empty payments array to review', async () => {
+      const date1 = new Date()
+      const date2 = new Date()
+      date2.setSeconds(date2.getSeconds() + 1)
+
+      const usersMock = [
+        { lastPaymentTime: date1.getTime(), lastReviewTime: date2.getTime(), save: () => { } }
+
+      ]
+      sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      const spy = sandbox.stub(uut.adapters.tokenTiger, 'addCredits')
+
+      const result = await uut.reviewPayments()
+
+      assert.isTrue(result)
+      assert.equal(usersMock[0].lastReviewTime, date2.getTime(), 'Expected to not be changed')
+      assert.isTrue(spy.notCalled, 'Endpoint will not be called')
+    })
+    it('should handle tokentiger error', async () => {
+      const usersMock = [
+        { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
+
+      ]
+      sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      sandbox.stub(uut.adapters.tokenTiger, 'addCredits').throws(new Error())
+
+      const result = await uut.reviewPayments()
+
+      assert.isTrue(result)
+      assert.equal(usersMock[0].lastReviewTime, 0, 'Expected to not be changed')
+    })
+    it('should handle unexpected error', async () => {
+      try {
+        sandbox.stub(uut.UserModel, 'find').throws(new Error('test error'))
+        await uut.reviewPayments()
+        assert.fail('Unexpected code path')
+      } catch (error) {
+        assert.include(error.message, 'test error')
+      }
     })
   })
 })

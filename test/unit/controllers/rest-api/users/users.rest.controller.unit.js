@@ -241,6 +241,54 @@ describe('#Users-REST-Controller', () => {
     })
   })
 
+  describe('GET /users/address/:id', () => {
+    it('should return 422 status on arbitrary biz logic error', async () => {
+      try {
+        // Force an error
+        sandbox
+          .stub(uut.useCases.user, 'getUserAddressByPearsonId')
+          .rejects(new Error('test error'))
+
+        await uut.getUserAddressByPearsonId(ctx)
+
+        assert.fail('Unexpected result')
+      } catch (err) {
+        assert.equal(err.status, 422)
+        assert.include(err.message, 'test error')
+      }
+    })
+
+    it('should return 200 status on success', async () => {
+      // Mock dependencies
+      sandbox.stub(uut.useCases.user, 'getUserAddressByPearsonId').resolves({ address: 'user address ' })
+
+      await uut.getUserAddressByPearsonId(ctx)
+
+      // Assert the expected HTTP response
+      assert.equal(ctx.status, 200)
+
+      // Assert that expected properties exist in the returned data.
+      assert.property(ctx.response.body, 'data')
+      assert.property(ctx.response.body.data, 'address')
+    })
+
+    it('should return other error status passed by biz logic', async () => {
+      try {
+        // Mock dependencies
+        const testErr = new Error('test error')
+        testErr.status = 404
+        sandbox.stub(uut.useCases.user, 'getUserAddressByPearsonId').rejects(testErr)
+
+        await uut.getUserAddressByPearsonId(ctx)
+
+        assert.fail('Unexpected result')
+      } catch (err) {
+        assert.equal(err.status, 404)
+        assert.include(err.message, 'test error')
+      }
+    })
+  })
+
   describe('#handleError', () => {
     it('should still throw error if there is no message', () => {
       try {
