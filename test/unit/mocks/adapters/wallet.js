@@ -16,7 +16,7 @@ class MockBchWallet {
     constructor() {
         this.walletInfoPromise = true;
         this.walletInfo = mockWallet;
-        this.initialize = async () => {}
+        this.initialize = async () => { }
         this.bchjs = new BCHJS();
         this.burnTokens = async () => {
             return { success: true, txid: 'txid' };
@@ -29,9 +29,10 @@ class MockBchWallet {
         this.listTokens = async () => { };
         this.getTxData = async () => {
             return [{
-                    tokenTicker: 'TROUT'
-                }];
+                tokenTicker: 'TROUT'
+            }];
         };
+        this.getUsd = async () => { return 1 }
         this.optimize = async () => { };
         // Environment variable is used by wallet-balance.unit.js to force an error.
         if (process.env.NO_UTXO) {

@@ -37,12 +37,35 @@ class UserUseCaseMock {
   }
 }
 
+class PaymentUseCaseMock {
+  async createPayment(userObj) {
+    return {}
+  }
+
+  async getAllPayments() {
+    return true
+  }
+
+  async getPayment(params) {
+    return true
+  }
+
+  async cancelPayment(existingPayment) {
+    return true
+  }
+
+  async deletePayment(user) {
+    return true
+  }
+}
+
 class UseCasesMock {
   constuctor(localConfig = {}) {
     // this.user = new UserUseCaseMock(localConfig)
   }
 
   user = new UserUseCaseMock()
+  payment = new PaymentUseCaseMock()
 }
 
 export default UseCasesMock;

@@ -160,6 +160,12 @@ export default {
 
   // ZMQ
   zmqIp: process.env.ZMQIP ? process.env.ZMQIP : '',
-  zmqPort: process.env.ZMQPORT ? process.env.ZMQPORT : ''
+  zmqPort: process.env.ZMQPORT ? process.env.ZMQPORT : '',
+
+  // Payment types
+  paymentTypes: {
+    1: { priceUSD: 3, creditsQuantity: 3 },
+    2: { priceUSD: 8, creditsQuantity: 10 }
+  }
 
 }

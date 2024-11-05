@@ -5,7 +5,7 @@
 */
 
 import UserUseCases from './user.js'
-
+import PaymentUseCases from './payment.js'
 class UseCases {
   constructor (localConfig = {}) {
     this.adapters = localConfig.adapters
@@ -17,6 +17,7 @@ class UseCases {
 
     // console.log('use-cases/index.js localConfig: ', localConfig)
     this.user = new UserUseCases(localConfig)
+    this.payment = new PaymentUseCases(localConfig)
   }
 
   // Run any startup Use Cases at the start of the app.

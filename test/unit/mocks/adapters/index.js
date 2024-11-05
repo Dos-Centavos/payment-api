@@ -69,6 +69,30 @@ const localdb = {
       return true
     }
   },
+  Payments: class Payments {
+    constructor(data = {}){
+        this._id = '_id'
+        this.type = data.type
+    }
+    static findById() { }
+    static find() { }
+    static findOne() {
+    }
+
+    async save() {
+      return {}
+    }
+
+
+    toJSON() {
+      return {}
+    }
+
+    async remove() {
+      return true
+    }
+
+  },
 
   validatePassword: () => {
     return true
