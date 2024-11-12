@@ -316,7 +316,7 @@ if (!config.noMongo) {
         }
       })
 
-      it('should throw 401 if deleting invalid payment', async () => {
+      it('should throw 422 if deleting invalid payment', async () => {
         const { token } = context
 
         try {
@@ -332,7 +332,7 @@ if (!config.noMongo) {
 
           assert.equal(true, false, 'Unexpected behavior')
         } catch (err) {
-          assert.equal(err.response.status, 401)
+          assert.equal(err.response.status, 422)
         }
       })
     })

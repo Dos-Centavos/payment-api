@@ -34,6 +34,10 @@ class MockBchWallet {
         };
         this.getUsd = async () => { return 1 }
         this.optimize = async () => { };
+
+        this.sendAll = async () => {
+            return 'fakeTxid';
+        };
         // Environment variable is used by wallet-balance.unit.js to force an error.
         if (process.env.NO_UTXO) {
             this.utxos = {};

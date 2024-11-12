@@ -145,7 +145,7 @@ describe('#ZMQjs', () => {
       sandbox.stub(uut.localdb.Users, 'findOne').resolves(null)
 
       const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
-      const result = await uut.reviewAddress(addr)
+      const result = await uut.reviewAddress(addr, mockData.txMock)
 
       assert.isFalse(result)
     })
@@ -154,16 +154,26 @@ describe('#ZMQjs', () => {
 
       sandbox.stub(uut.localdb.Users, 'findOne').resolves(userMock)
       const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
-      const result = await uut.reviewAddress(addr)
+      const result = await uut.reviewAddress(addr, mockData.txMock)
 
       assert.isObject(result)
       assert.isNumber(result.lastPaymentTime)
+    })
+    it('should not update owner user if tx already hanlded', async () => {
+      const userMock = { save: () => {} }
+      uut.detectedTxs.push(mockData.txMock.format.txid)
+
+      sandbox.stub(uut.localdb.Users, 'findOne').resolves(userMock)
+      const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
+      const result = await uut.reviewAddress(addr, mockData.txMock)
+
+      assert.isFalse(result)
     })
     it('should return false on error', async () => {
       sandbox.stub(uut.localdb.Users, 'findOne').throws(new Error())
 
       const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
-      const result = await uut.reviewAddress(addr)
+      const result = await uut.reviewAddress(addr, mockData.txMock)
 
       assert.isFalse(result)
     })

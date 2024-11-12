@@ -21,6 +21,8 @@ class UserLib {
     // Encapsulate dependencies
     this.UserEntity = new UserEntity()
     this.UserModel = this.adapters.localdb.Users
+    this.PaymentModel = this.adapters.localdb.Payments
+    this.BchWallet = this.adapters.wallet.BchWallet
 
     // Bind functions.
     this.getWalletSequence = this.getWalletSequence.bind(this)
@@ -258,24 +260,67 @@ class UserLib {
       for (let i = 0; i < usersToReview.length; i++) {
         try {
           const user = usersToReview[i]
-          /**
-           * TODO :  Process and validate the balance before sending credits to the user.
-           */
+          // Get payment model
+          const payment = await this.PaymentModel.findOne({
+            userId: user._id,
+            status: 'in-process'
+          })
+          if (!payment) {
+            console.log(
+              `user ${user._id} does not have any payment with status 'in-process'. Skipping`
+            )
+            continue
+          }
+
+          // Instantiate user wallet
+          const walletConfig = {
+            authPass: this.config.authPass,
+            restURL: this.config.apiServer,
+            hdPath: `m/44'/245'/0'/0/${user.walletIndex}`
+          }
+          const userWallet = await this.adapters.wallet._instanceWallet(
+            this.config.pearsonMnemonic,
+            walletConfig
+          )
+          // Get user balance.
+          const balance = await userWallet.getBalance()
+          console.log(
+            `Payment ${payment._id} price : ${payment.priceSats} Sats`
+          )
+          console.log(`user ${user._id} balance : ${balance} Sats`)
+          if (balance < payment.priceSats) {
+            console.log(
+              `Insufficient balance for payment price ${payment.priceSats} Sats. Skipping`
+            )
+            continue
+          }
+
+          // Send balance to app address
+          console.log(`Seding balance to : ${this.config.receiverAddress}`)
+          await userWallet.initialize()
+
+          // NOTE: it should send the payment price amount instead all the balance?
+          const tx = await userWallet.sendAll(this.config.receiverAddress)
+          console.log(`Tx : ${tx}`)
+
+          // Add credits to user.
           await this.adapters.tokenTiger.addCredits({
-            qty: 1,
+            qty: payment.creditsQuantity,
             userId: user.pearsonId
           })
 
           // Save the timestamp of the last payment processed
           user.lastReviewTime = new Date().getTime()
+          payment.status = 'completed'
           await user.save()
+          await payment.save()
         } catch (error) {
           continue
         }
       }
       return true
     } catch (error) {
-      console.log('Error on use-cases/user/reviewPayment()')
+      console.log('Error on use-cases/user/reviewPayment()', error)
       throw error
     }
   }

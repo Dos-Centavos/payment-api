@@ -93,7 +93,7 @@ class PaymentRouter {
   }
 
   async deletePayment (ctx, next) {
-    await this.validators.ensureTargetUserOrAdmin(ctx, next)
+    await this.validators.ensureUser(ctx, next)
     await this.paymentRESTControllerLib.getPayment(ctx, next)
     await this.paymentRESTControllerLib.deletePayment(ctx, next)
     return true
