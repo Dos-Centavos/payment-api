@@ -127,7 +127,7 @@ describe('#Payments-REST-Router', () => {
   describe('#deletePayment', () => {
     it('should route traffic to the middleware and controller', async () => {
       // Mock dependencies and force desired code path
-      sandbox.stub(uut.validators, 'ensureTargetUserOrAdmin').resolves()
+      sandbox.stub(uut.validators, 'ensureUser').resolves()
       sandbox.stub(uut.paymentRESTControllerLib, 'getPayment').resolves()
       sandbox.stub(uut.paymentRESTControllerLib, 'deletePayment').resolves()
 

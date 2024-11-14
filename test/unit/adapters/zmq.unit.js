@@ -145,25 +145,43 @@ describe('#ZMQjs', () => {
       sandbox.stub(uut.localdb.Users, 'findOne').resolves(null)
 
       const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
-      const result = await uut.reviewAddress(addr)
+      const result = await uut.reviewAddress(addr, mockData.txMock)
 
       assert.isFalse(result)
     })
     it('should update owner user if address exist', async () => {
       const userMock = { save: () => {} }
+      const paymentMock = { txs: [], save: () => {} }
 
       sandbox.stub(uut.localdb.Users, 'findOne').resolves(userMock)
+      sandbox.stub(uut.localdb.Payments, 'findOne')
+        .onCall(0).resolves(null) //  Resolves an existing tx
+        .onCall(1).resolves(paymentMock) // Resolves current user payment model
+
       const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
-      const result = await uut.reviewAddress(addr)
+      const result = await uut.reviewAddress(addr, mockData.txMock)
 
       assert.isObject(result)
       assert.isNumber(result.lastPaymentTime)
+    })
+    it('should not update owner user if tx already hanlded', async () => {
+      const userMock = { save: () => {} }
+      const paymentMock = { txs: [], save: () => {} }
+
+      sandbox.stub(uut.localdb.Users, 'findOne').resolves(userMock)
+      sandbox.stub(uut.localdb.Payments, 'findOne')
+        .onCall(0).resolves(paymentMock) // Resolves an existing tx
+
+      const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
+      const result = await uut.reviewAddress(addr, mockData.txMock)
+
+      assert.isFalse(result)
     })
     it('should return false on error', async () => {
       sandbox.stub(uut.localdb.Users, 'findOne').throws(new Error())
 
       const addr = 'bitcoincash:qqfx3wcg8ts09mt5l3zey06wenapyfqq2qrcyj5x0s'
-      const result = await uut.reviewAddress(addr)
+      const result = await uut.reviewAddress(addr, mockData.txMock)
 
       assert.isFalse(result)
     })

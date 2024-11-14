@@ -9,7 +9,8 @@ const Payment = new mongoose.Schema({
   status: { type: String, required: true }, // Payment status
   creditsQuantity: { type: Number, required: true }, // Quantity of credits to send to the user
   completedAt: { type: Number }, // Timestamp of payment completion
-  type: { type: Number } // Payment bracket
+  type: { type: Number }, // Payment bracket
+  txs: { type: Array, default: [] } // Transactions list.
 })
 
 export default mongoose.model('payment', Payment)

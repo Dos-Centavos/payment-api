@@ -17,7 +17,9 @@ import * as url from 'url'
 // Get the version from the package.json file.
 import { readFileSync } from 'fs'
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const pkgInfo = JSON.parse(readFileSync(`${__dirname.toString()}/../../package.json`))
+const pkgInfo = JSON.parse(
+  readFileSync(`${__dirname.toString()}/../../package.json`)
+)
 
 const version = pkgInfo.version
 
@@ -59,24 +61,23 @@ export default {
   // Wallet Configuration
   // Default value: web3 - connect to bch-api through web 3 JSON RPC over IPFS.
   // Alternate value: web2 - connect to bch-api through a web 2 REST API over HTTP.
-  walletInterface: process.env.WALLET_INTERFACE ? process.env.WALLET_INTERFACE : 'web3',
+  walletInterface: process.env.WALLET_INTERFACE
+    ? process.env.WALLET_INTERFACE
+    : 'web3',
 
   // Wallet API Server
   // Default web2 server: https://api.fullstack.cash/v5/
   // Default web3 server: https://free-bch.fullstack.cash/
-  apiServer: process.env.WALLET_INTERFACE === 'web2'
-    ? (
-        process.env.APISERVER
-          ? process.env.APISERVER
-          : 'https://api.fullstack.cash/v5/'
-      )
-    : 'https://free-bch.fullstack.cash/',
+  apiServer:
+    process.env.WALLET_INTERFACE === 'web2'
+      ? process.env.APISERVER
+        ? process.env.APISERVER
+        : 'https://api.fullstack.cash/v5/'
+      : 'https://free-bch.fullstack.cash/',
 
   // Basic Authentication Password for connecting to bch-api through a web 2
   // REST API over HTTP.
-  authPass: process.env.WALLET_AUTH_PASS
-    ? process.env.WALLET_AUTH_PASS
-    : '',
+  authPass: process.env.WALLET_AUTH_PASS ? process.env.WALLET_AUTH_PASS : '',
 
   // FullStack.cash account information, used for automatic JWT handling.
   getJwtAtStartup: process.env.GET_JWT_AT_STARTUP ? true : false,
@@ -145,7 +146,6 @@ export default {
   bootstrapRelays: [
     // v2 Circuit Relay (Token Tiger)
     // '/ip4/137.184.93.145/tcp/8001/p2p/12D3KooWGMEKkdJfyZbwdH9EafZbRTtMn7FnhWPrE4MhRty2763g',
-
     // v2 Circuit Relay server (FullStack.cash)
     // '/ip4/78.46.129.7/tcp/4001/p2p/12D3KooWFQ11GQ5NubsJGhYZ4X3wrAGimLevxfm6HPExCrMYhpSL'
   ],
@@ -153,10 +153,18 @@ export default {
   // END IPFS CONFIGURATION
 
   // Pearson-api Data
-  pearsonMnemonic: process.env.PEARSON_MNEMONIC ? process.env.PEARSON_MNEMONIC : '',
-  pearsonApiUrl: process.env.PEARSON_API_URL ? process.env.PEARSON_API_URL : 'http://localhost:5001',
-  pearsonAuthEmail: process.env.PEARSON_AUTH_EMAIL ? process.env.PEARSON_AUTH_EMAIL : '',
-  pearsonAuthPass: process.env.PEARSON_AUTH_PASS ? process.env.PEARSON_AUTH_PASS : '',
+  pearsonMnemonic: process.env.PEARSON_MNEMONIC
+    ? process.env.PEARSON_MNEMONIC
+    : '',
+  pearsonApiUrl: process.env.PEARSON_API_URL
+    ? process.env.PEARSON_API_URL
+    : 'http://localhost:5001',
+  pearsonAuthEmail: process.env.PEARSON_AUTH_EMAIL
+    ? process.env.PEARSON_AUTH_EMAIL
+    : '',
+  pearsonAuthPass: process.env.PEARSON_AUTH_PASS
+    ? process.env.PEARSON_AUTH_PASS
+    : '',
 
   // ZMQ
   zmqIp: process.env.ZMQIP ? process.env.ZMQIP : '',
@@ -164,8 +172,11 @@ export default {
 
   // Payment types
   paymentTypes: {
-    1: { priceUSD: 3, creditsQuantity: 3 },
-    2: { priceUSD: 8, creditsQuantity: 10 }
-  }
-
+    1: { priceUSD: 0.03, creditsQuantity: 3 },
+    2: { priceUSD: 0.08, creditsQuantity: 10 }
+  },
+  // APP address to hold all funds after payment success
+  receiverAddress: process.env.RECEIVER_ADDRESS
+    ? process.env.RECEIVER_ADDRESS
+    : 'qz6lf6gpmn3secx73g7ucfcgy8mrh3sz2y2ylk643x'
 }

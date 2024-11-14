@@ -16,10 +16,13 @@ const txObj = {
     { scriptPubKey: { addresses: ['1NoYQso5UF6XqC4NbjKAp2EnjJ59yLNn74'] } }
   ]
 }
+
+const txMock = { format : { txid : '28dbf5ff76b1300d84bcf9f470a4bf29a679735b4de0ae0f75c465e1744047a6'}}
 export default {
   topic01,
   msg01,
   blockTopic,
   blockMsg,
-  txObj
+  txObj,
+  txMock 
 }

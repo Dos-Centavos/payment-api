@@ -16,6 +16,8 @@ import UserLib from '../../../src/use-cases/user.js'
 
 import adapters from '../mocks/adapters/index.js'
 
+import { MockBchWallet } from '../mocks/adapters/wallet.js'
+
 describe('#users-use-case', () => {
   let uut
   let sandbox
@@ -480,9 +482,16 @@ describe('#users-use-case', () => {
     it('should review payments', async () => {
       const usersMock = [
         { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
-
       ]
+      const paymentMock = { priceSats: 100, save: () => { } }
+
+      const walletMock = new MockBchWallet()
+      walletMock.getBalance = () => { return 100 }
+
       sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      sandbox.stub(uut.PaymentModel, 'findOne').resolves(paymentMock)
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves(walletMock)
+
       const spy = sandbox.stub(uut.adapters.tokenTiger, 'addCredits').resolves()
 
       const result = await uut.reviewPayments()
@@ -509,12 +518,60 @@ describe('#users-use-case', () => {
       assert.equal(usersMock[0].lastReviewTime, date2.getTime(), 'Expected to not be changed')
       assert.isTrue(spy.notCalled, 'Endpoint will not be called')
     })
+    it('should handle Insufficient balance', async () => {
+      const usersMock = [
+        { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
+      ]
+      const paymentMock = { priceSats: 100, save: () => { } }
+
+      const walletMock = new MockBchWallet()
+      walletMock.getBalance = () => { return 99 }
+
+      sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      sandbox.stub(uut.PaymentModel, 'findOne').resolves(paymentMock)
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves(walletMock)
+
+      const spy = sandbox.stub(uut.adapters.tokenTiger, 'addCredits').resolves()
+
+      const result = await uut.reviewPayments()
+
+      assert.isTrue(result)
+      assert.equal(usersMock[0].lastReviewTime, 0, 'Expected to not be changed')
+      assert.isTrue(spy.notCalled, 'Endpoint will not be called')
+    })
+
+    it('should handle not-found payment model with status "in-process"', async () => {
+      const usersMock = [
+        { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
+      ]
+
+      const walletMock = new MockBchWallet()
+      walletMock.getBalance = () => { return 999 }
+
+      sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      sandbox.stub(uut.PaymentModel, 'findOne').resolves(null)
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves(walletMock)
+      const spy = sandbox.stub(uut.adapters.tokenTiger, 'addCredits').resolves()
+
+      const result = await uut.reviewPayments()
+
+      assert.isTrue(result)
+      assert.equal(usersMock[0].lastReviewTime, 0, 'Expected to not be changed')
+      assert.isTrue(spy.notCalled, 'Endpoint will not be called')
+    })
     it('should handle tokentiger error', async () => {
       const usersMock = [
         { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
-
       ]
+
+      const paymentMock = { priceSats: 100, save: () => { } }
+
+      const walletMock = new MockBchWallet()
+      walletMock.getBalance = () => { return 999 }
+
       sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      sandbox.stub(uut.PaymentModel, 'findOne').resolves(paymentMock)
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves(walletMock)
       sandbox.stub(uut.adapters.tokenTiger, 'addCredits').throws(new Error())
 
       const result = await uut.reviewPayments()

@@ -19,7 +19,7 @@ class ZMQ {
     // State
     this.txQueue = []
     this.blockQueue = []
-
+    this.detectedTxs = []
     this.wallet = new MinimalBCHWallet()
 
     // Bind 'this' object to subfunctions
@@ -119,16 +119,39 @@ class ZMQ {
   // If this is the case, then saves a timestamp to the user model.
   async reviewAddress (addr, tx) {
     try {
+      // Looking for in-app address
       const user = await this.localdb.Users.findOne({ walletAddress: addr })
       if (!user) {
         return false
       }
+      console.log(`Detected tx in app-wallet ${tx.format.txid}`)
+
+      // Verify if the transaction has been handled
+      // NOTE : This condition is here because the payments are detected a couple of times,
+      // it was detected before any block confirmation
+      // and after a block confirmation.
+      const existingTx = await this.localdb.Payments.findOne({ txs: tx.format.txid })
+
+      if (existingTx) {
+        console.log(`Tx : ${tx.format.txid} already handled`)
+        return false
+      }
+
+      // Save unhandled-tx into the current payment model associated to the user
+      const currentUserPayment = await this.localdb.Payments.findOne({
+        userId: user._id,
+        status: 'in-process'
+      })
+
+      if (!currentUserPayment) return false
+
+      currentUserPayment.txs.push(tx.format.txid)
+      await currentUserPayment.save()
 
       user.lastPaymentTime = new Date().getTime()
-
       await user.save()
-
       console.log(`user payment receive ${user.email}`)
+
       return user
     } catch (err) {
       console.error('Error in reviewAddress: ', err)
