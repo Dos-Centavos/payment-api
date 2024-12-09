@@ -105,6 +105,7 @@ class Wallet {
 class TokenTiger {
   constructor() { }
   addCredits() { }
+  auth() { }
 }
 
 export default {
