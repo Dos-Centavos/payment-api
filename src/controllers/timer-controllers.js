@@ -28,7 +28,10 @@ class TimerControllers {
 
     // Bind 'this' object to all subfunctions.
     this.reviewPayments = this.reviewPayments.bind(this)
+    this.renewTokenTigerJWT = this.renewTokenTigerJWT.bind(this)
+
     this.reviewTime = 30000 // 30seg
+    this.renewTime = 60000 * 60 * 6 // 6hr
 
     // this.startTimers()
   }
@@ -38,6 +41,7 @@ class TimerControllers {
     // Any new timer control functions can be added here. They will be started
     // when the server starts.
     this.reviewPaymentTimer = setInterval(this.reviewPayments, this.reviewTime)
+    this.renewJWTTimer = setInterval(this.renewTokenTigerJWT, this.renewTime)
 
     return true
   }
@@ -61,6 +65,24 @@ class TimerControllers {
     } catch (err) {
       console.error('Error in reviewPayment(): ', err)
       this.reviewPaymentTimer = setInterval(this.reviewPayments, this.reviewTime)
+
+      // Note: Do not throw an error. This is a top-level function.
+      return false
+    }
+  }
+
+  // Renew Token Tiger JWT
+  async renewTokenTigerJWT () {
+    try {
+      clearInterval(this.renewJWTTimer)
+
+      await this.useCases.payment.renewTokenTigerJWT()
+
+      this.renewJWTTimer = setInterval(this.renewTokenTigerJWT, this.renewTime)
+      return true
+    } catch (err) {
+      console.error('Error in timer-controller/renewTokenTigerJWT(): ', err)
+      this.renewJWTTimer = setInterval(this.renewTokenTigerJWT, this.renewTime)
 
       // Note: Do not throw an error. This is a top-level function.
       return false

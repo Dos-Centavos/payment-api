@@ -57,6 +57,9 @@ class PaymentUseCaseMock {
   async deletePayment(user) {
     return true
   }
+  async renewTokenTigerJWT(){
+    return true
+  }
 }
 
 class UseCasesMock {
