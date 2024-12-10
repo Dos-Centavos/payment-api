@@ -518,6 +518,28 @@ describe('#users-use-case', () => {
       assert.equal(usersMock[0].lastReviewTime, date2.getTime(), 'Expected to not be changed')
       assert.isTrue(spy.notCalled, 'Endpoint will not be called')
     })
+
+    it('should allow 2% price margin.', async () => {
+      const usersMock = [
+        { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
+      ]
+      const paymentMock = { priceSats: 100, save: () => { } }
+
+      const walletMock = new MockBchWallet()
+      walletMock.getBalance = () => { return 98 }
+
+      sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
+      sandbox.stub(uut.PaymentModel, 'findOne').resolves(paymentMock)
+      sandbox.stub(uut.adapters.wallet, '_instanceWallet').resolves(walletMock)
+
+      const spy = sandbox.stub(uut.adapters.tokenTiger, 'addCredits').resolves()
+
+      const result = await uut.reviewPayments()
+
+      assert.isTrue(result)
+      assert.notEqual(usersMock[0].lastReviewTime, 0, 'Expected to be changed')
+      assert.isTrue(spy.calledOnce, 'Endpoint will be called')
+    })
     it('should handle Insufficient balance', async () => {
       const usersMock = [
         { lastPaymentTime: new Date().getTime(), lastReviewTime: 0, save: () => { } }
@@ -525,7 +547,7 @@ describe('#users-use-case', () => {
       const paymentMock = { priceSats: 100, save: () => { } }
 
       const walletMock = new MockBchWallet()
-      walletMock.getBalance = () => { return 99 }
+      walletMock.getBalance = () => { return 97 }
 
       sandbox.stub(uut.UserModel, 'find').resolves(usersMock)
       sandbox.stub(uut.PaymentModel, 'findOne').resolves(paymentMock)
