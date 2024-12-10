@@ -28,6 +28,7 @@ class PaymentUseCases {
     this.getAllPayments = this.getAllPayments.bind(this)
     this.cancelPayment = this.cancelPayment.bind(this)
     this.deletePayment = this.deletePayment.bind(this)
+    this.renewTokenTigerJWT = this.renewTokenTigerJWT.bind(this)
   }
 
   // Create payment model
@@ -143,6 +144,20 @@ class PaymentUseCases {
     } catch (err) {
       wlogger.error('Error in use-cases/payment.js/deletePayment()')
       throw err
+    }
+  }
+
+  // Renew Token Tiger JWT
+  async renewTokenTigerJWT () {
+    try {
+      // Renew JWT.
+      const jwt = await this.adapters.tokenTiger.auth()
+      console.log('Token Tiger JWT updated! ')
+
+      return jwt
+    } catch (error) {
+      console.log('Error on use-cases/payment.js/renewTokenTigerJWT()', error)
+      throw error
     }
   }
 }

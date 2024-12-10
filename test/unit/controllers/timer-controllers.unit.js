@@ -81,4 +81,19 @@ describe('#Timer-Controllers', () => {
       assert.equal(result, false)
     })
   })
+  describe('#renewTokenTigerJWT', () => {
+    it('should kick off the jwt renew', async () => {
+      sandbox.stub(uut.useCases.payment, 'renewTokenTigerJWT').resolves()
+      const result = await uut.renewTokenTigerJWT()
+
+      assert.equal(result, true)
+    })
+
+    it('should return false on error', async () => {
+      sandbox.stub(uut.useCases.payment, 'renewTokenTigerJWT').throws()
+      const result = await uut.renewTokenTigerJWT()
+
+      assert.equal(result, false)
+    })
+  })
 })

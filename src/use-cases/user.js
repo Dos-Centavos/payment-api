@@ -288,7 +288,9 @@ class UserLib {
             `Payment ${payment._id} price : ${payment.priceSats} Sats`
           )
           console.log(`user ${user._id} balance : ${balance} Sats`)
-          if (balance < payment.priceSats) {
+
+          const margin = payment.priceSats * 0.02
+          if (balance < (payment.priceSats - margin)) {
             console.log(
               `Insufficient balance for payment price ${payment.priceSats} Sats. Skipping`
             )

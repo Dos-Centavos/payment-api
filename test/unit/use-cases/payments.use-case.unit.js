@@ -279,4 +279,26 @@ describe('#payments-use-case', () => {
       assert.isOk('Not throwing an error is a pass!')
     })
   })
+
+  describe('#renewTokenTigerJWT', () => {
+    it('should handle error', async () => {
+      try {
+        sandbox.stub(uut.adapters.tokenTiger, 'auth').throws(new Error('test error'))
+        await uut.renewTokenTigerJWT()
+
+        assert.fail('Unexpected code path.')
+      } catch (err) {
+        // console.log(err)
+        assert.include(err.message, 'test error')
+      }
+    })
+
+    it('should renew token-tiger jwt', async () => {
+      sandbox.stub(uut.adapters.tokenTiger, 'auth').resolves('new jwt')
+      const result = await uut.renewTokenTigerJWT()
+
+      assert.isString(result)
+      assert.equal(result, 'new jwt')
+    })
+  })
 })
