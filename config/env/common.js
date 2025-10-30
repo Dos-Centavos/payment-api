@@ -172,8 +172,8 @@ export default {
 
   // Payment types
   paymentTypes: {
-    1: { priceUSD: 0.03, creditsQuantity: 3 },
-    2: { priceUSD: 0.08, creditsQuantity: 10 }
+    1: { priceUSD: 2.99, creditsQuantity: 3 },
+    2: { priceUSD: 4.99, creditsQuantity: 10 }
   },
   // APP address to hold all funds after payment success
   receiverAddress: process.env.RECEIVER_ADDRESS
