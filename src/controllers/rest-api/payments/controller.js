@@ -29,6 +29,7 @@ class PaymentRESTControllerLib {
     this.getPayments = this.getPayments.bind(this)
     this.cancelPayment = this.cancelPayment.bind(this)
     this.deletePayment = this.deletePayment.bind(this)
+    this.verifyStripePayment = this.verifyStripePayment.bind(this)
     this.handleError = this.handleError.bind(this)
   }
 
@@ -38,9 +39,15 @@ class PaymentRESTControllerLib {
 
       const payment = await this.useCases.payment.createPayment(paymentObj)
 
-      ctx.body = {
-        payment
+      const response = { payment }
+      if (payment.checkoutUrl) {
+        response.checkoutUrl = payment.checkoutUrl
       }
+      if (payment.clientSecret) {
+        response.clientSecret = payment.clientSecret
+      }
+
+      ctx.body = response
     } catch (err) {
       this.handleError(ctx, err)
     }
@@ -96,6 +103,28 @@ class PaymentRESTControllerLib {
       ctx.body = {
         success: true
       }
+    } catch (err) {
+      this.handleError(ctx, err)
+    }
+  }
+
+  async verifyStripePayment (ctx) {
+    try {
+      const payment = ctx.body.payment
+      const user = ctx.state.user
+
+      if (
+        user._id.toString() !== payment.userId.toString() &&
+        user.type !== 'admin'
+      ) {
+        ctx.throw(401, 'Not authorized to verify this payment')
+      }
+
+      const verifiedPayment = await this.useCases.payment.verifyStripePayment(
+        payment
+      )
+
+      ctx.body = { payment: verifiedPayment }
     } catch (err) {
       this.handleError(ctx, err)
     }

@@ -70,25 +70,28 @@ const localdb = {
     }
   },
   Payments: class Payments {
-    constructor(data = {}){
-        this._id = '_id'
-        this.type = data.type
-    }
-    static findById() { }
-    static find() { }
-    static findOne() {
+    constructor (data = {}) {
+      this._id = '_id'
+      this.type = data.type
+      this.userId = data.userId
+      this.paymentMethod = data.paymentMethod || 'Blockchain'
+      this.status = 'in-process'
     }
 
-    async save() {
+    static findById () { }
+    static find () { }
+    static findOne () {
+    }
+
+    async save () {
       return {}
     }
 
-
-    toJSON() {
+    toJSON () {
       return {}
     }
 
-    async remove() {
+    async remove () {
       return true
     }
 
@@ -108,9 +111,47 @@ class TokenTiger {
   auth() { }
 }
 
+class StripeAdapter {
+  constructor () { }
+  createCheckoutSession () {
+    return Promise.resolve({
+      id: 'cs_test_123',
+      url: 'https://checkout.stripe.com/test'
+    })
+  }
+  createPaymentIntent () {
+    return Promise.resolve({
+      id: 'pi_test_123',
+      client_secret: 'pi_test_123_secret'
+    })
+  }
+  retrieveCheckoutSession () {
+    return Promise.resolve({
+      id: 'cs_test_123',
+      payment_status: 'paid',
+      metadata: { paymentId: '_id' }
+    })
+  }
+  retrievePaymentIntent () {
+    return Promise.resolve({
+      id: 'pi_test_123',
+      status: 'succeeded',
+      object: 'payment_intent',
+      metadata: { paymentId: '_id' }
+    })
+  }
+  expireCheckoutSession () {
+    return Promise.resolve(true)
+  }
+  cancelPaymentIntent () {
+    return Promise.resolve(true)
+  }
+}
+
 export default {
   ipfs,
   localdb,
   wallet: new Wallet(),
-  tokenTiger : new TokenTiger()
+  tokenTiger: new TokenTiger(),
+  stripe: new StripeAdapter()
 };

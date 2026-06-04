@@ -20,6 +20,7 @@ import config from '../../config/index.js'
 import Wallet from './wallet.adapter.js'
 import ZMQ from './zmq.js'
 import TokenTiger from './token-tiger.js'
+import StripeAdapter from './stripe.js'
 
 class Adapters {
   constructor (localConfig = {}) {
@@ -35,6 +36,7 @@ class Adapters {
     this.wallet = new Wallet(localConfig)
     this.zmq = new ZMQ({ config, localdb: this.localdb })
     this.tokenTiger = new TokenTiger(config)
+    this.stripe = new StripeAdapter(config)
 
     // Get a valid JWT API key and instance bch-js.
     this.fullStackJwt = new FullStackJWT(config)

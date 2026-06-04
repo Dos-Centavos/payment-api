@@ -82,11 +82,52 @@ describe('#Payments-REST-Controller', () => {
 
       await uut.createPayment(ctx)
 
-      // Assert the expected HTTP response
       assert.equal(ctx.status, 200)
-
-      // Assert that expected properties exist in the returned data.
       assert.property(ctx.response.body, 'payment')
+    })
+
+    it('should include checkoutUrl for Stripe Checkout payments', async () => {
+      ctx.request.body = {
+        payment: {
+          userId: 'userId',
+          type: 1,
+          paymentMethod: 'Stripe'
+        }
+      }
+
+      sandbox.stub(uut.useCases.payment, 'createPayment').resolves({
+        _id: 'payment123',
+        checkoutUrl: 'https://checkout.stripe.com/test'
+      })
+
+      await uut.createPayment(ctx)
+
+      assert.property(ctx.response.body, 'checkoutUrl')
+      assert.equal(
+        ctx.response.body.checkoutUrl,
+        'https://checkout.stripe.com/test'
+      )
+    })
+
+    it('should include clientSecret for embedded Stripe payments', async () => {
+      ctx.request.body = {
+        payment: {
+          userId: 'userId',
+          type: 1,
+          paymentMethod: 'Stripe',
+          stripeUiMode: 'embedded'
+        }
+      }
+
+      sandbox.stub(uut.useCases.payment, 'createPayment').resolves({
+        _id: 'payment123',
+        clientSecret: 'pi_test_123_secret'
+      })
+
+      await uut.createPayment(ctx)
+
+      assert.property(ctx.response.body, 'clientSecret')
+      assert.equal(ctx.response.body.clientSecret, 'pi_test_123_secret')
     })
   })
 
@@ -236,6 +277,103 @@ describe('#Payments-REST-Controller', () => {
 
       // Assert the expected HTTP response
       assert.equal(ctx.status, 200)
+    })
+  })
+
+  describe('#verifyStripePayment', () => {
+    it('should return 401 if caller is not the payment owner', async () => {
+      ctx.body = {
+        payment: {
+          userId: 'other-user-id'
+        }
+      }
+      ctx.state.user = {
+        _id: { toString: () => 'user-id' },
+        type: 'user'
+      }
+
+      try {
+        await uut.verifyStripePayment(ctx)
+        assert.fail('Unexpected result')
+      } catch (err) {
+        assert.equal(err.status, 401)
+        assert.include(err.message, 'Not authorized to verify this payment')
+      }
+    })
+
+    it('should verify payment for the owner', async () => {
+      ctx.body = {
+        payment: {
+          _id: 'payment123',
+          userId: 'user-id',
+          status: 'completed'
+        }
+      }
+      ctx.state.user = {
+        _id: { toString: () => 'user-id' },
+        type: 'user'
+      }
+
+      sandbox.stub(uut.useCases.payment, 'verifyStripePayment').resolves({
+        _id: 'payment123',
+        status: 'completed'
+      })
+
+      await uut.verifyStripePayment(ctx)
+
+      assert.equal(ctx.status, 200)
+      assert.property(ctx.response.body, 'payment')
+      assert.equal(ctx.response.body.payment.status, 'completed')
+    })
+
+    it('should allow admin to verify any payment', async () => {
+      ctx.body = {
+        payment: {
+          _id: 'payment123',
+          userId: 'other-user-id',
+          status: 'completed'
+        }
+      }
+      ctx.state.user = {
+        _id: { toString: () => 'admin-id' },
+        type: 'admin'
+      }
+
+      sandbox.stub(uut.useCases.payment, 'verifyStripePayment').resolves({
+        _id: 'payment123',
+        status: 'completed'
+      })
+
+      await uut.verifyStripePayment(ctx)
+
+      assert.equal(ctx.status, 200)
+      assert.equal(ctx.response.body.payment.status, 'completed')
+    })
+
+    it('should return 422 when Stripe payment is not completed', async () => {
+      ctx.body = {
+        payment: {
+          _id: 'payment123',
+          userId: 'user-id',
+          paymentMethod: 'Stripe'
+        }
+      }
+      ctx.state.user = {
+        _id: { toString: () => 'user-id' },
+        type: 'user'
+      }
+
+      const testErr = new Error('Stripe payment has not been completed')
+      testErr.status = 422
+      sandbox.stub(uut.useCases.payment, 'verifyStripePayment').rejects(testErr)
+
+      try {
+        await uut.verifyStripePayment(ctx)
+        assert.fail('Unexpected result')
+      } catch (err) {
+        assert.equal(err.status, 422)
+        assert.include(err.message, 'Stripe payment has not been completed')
+      }
     })
   })
 

@@ -1,9 +1,11 @@
 /*
-  User Entity
+  Payment Entity
 */
 
-class User {
-  validate ({ userId, type } = {}) {
+const PAYMENT_METHODS = ['Blockchain', 'Stripe']
+
+class Payment {
+  validate ({ userId, type, paymentMethod = 'Blockchain' } = {}) {
     // Input Validation
     if (!userId || typeof userId !== 'string') {
       throw new Error("Property 'userId' must be a string!")
@@ -13,10 +15,16 @@ class User {
       throw new Error("Property 'type' must be a number!")
     }
 
-    const data = { userId, type }
+    if (paymentMethod && typeof paymentMethod !== 'string') {
+      throw new Error("Property 'paymentMethod' must be a string!")
+    }
 
-    return data
+    if (!PAYMENT_METHODS.includes(paymentMethod)) {
+      throw new Error("Property 'paymentMethod' must be 'Blockchain' or 'Stripe'")
+    }
+
+    return { userId, type, paymentMethod }
   }
 }
 
-export default User
+export default Payment
