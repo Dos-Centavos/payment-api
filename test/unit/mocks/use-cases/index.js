@@ -57,13 +57,17 @@ class PaymentUseCaseMock {
   async deletePayment(user) {
     return true
   }
-  async renewTokenTigerJWT(){
+  async renewTokenTigerJWT () {
     return true
+  }
+
+  async verifyStripePayment (payment) {
+    return payment
   }
 }
 
 class UseCasesMock {
-  constuctor(localConfig = {}) {
+  constructor (localConfig = {}) {
     // this.user = new UserUseCaseMock(localConfig)
   }
 

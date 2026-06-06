@@ -178,5 +178,16 @@ export default {
   // APP address to hold all funds after payment success
   receiverAddress: process.env.RECEIVER_ADDRESS
     ? process.env.RECEIVER_ADDRESS
-    : 'qz6lf6gpmn3secx73g7ucfcgy8mrh3sz2y2ylk643x'
+    : 'qz6lf6gpmn3secx73g7ucfcgy8mrh3sz2y2ylk643x',
+
+  // Stripe
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY
+    ? process.env.STRIPE_SECRET_KEY
+    : '',
+  stripeSuccessUrl: process.env.STRIPE_SUCCESS_URL
+    ? process.env.STRIPE_SUCCESS_URL
+    : 'http://localhost:5020/payments/stripe/success',
+  stripeCancelUrl: process.env.STRIPE_CANCEL_URL
+    ? process.env.STRIPE_CANCEL_URL
+    : 'http://localhost:5020/payments/stripe/cancel'
 }

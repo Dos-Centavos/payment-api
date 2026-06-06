@@ -199,7 +199,7 @@ class UserLib {
       const users = await this.UserModel.find({})
       const latUser = users[users.length - 1]
       if (latUser) {
-        walletIndex = latUser.walletIndex + 1
+        walletIndex = latUser.walletIndex + 1 || 0
       }
       const walletConfig = {
         authPass: this.config.authPass,

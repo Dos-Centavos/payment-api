@@ -46,6 +46,7 @@ class PaymentRouter {
     this.getById = this.getById.bind(this)
     this.cancelPayment = this.cancelPayment.bind(this)
     this.deletePayment = this.deletePayment.bind(this)
+    this.verifyStripePayment = this.verifyStripePayment.bind(this)
   }
 
   attach (app) {
@@ -56,6 +57,7 @@ class PaymentRouter {
     }
 
     // Define the routes and attach the controller.
+    this.router.post('/stripe/verify/:id', this.verifyStripePayment)
     this.router.post('/', this.createPayment)
     this.router.get('/', this.getAll)
     this.router.get('/:id', this.getById)
@@ -96,6 +98,13 @@ class PaymentRouter {
     await this.validators.ensureUser(ctx, next)
     await this.paymentRESTControllerLib.getPayment(ctx, next)
     await this.paymentRESTControllerLib.deletePayment(ctx, next)
+    return true
+  }
+
+  async verifyStripePayment (ctx, next) {
+    await this.validators.ensureUser(ctx, next)
+    await this.paymentRESTControllerLib.getPayment(ctx, next)
+    await this.paymentRESTControllerLib.verifyStripePayment(ctx, next)
     return true
   }
 }

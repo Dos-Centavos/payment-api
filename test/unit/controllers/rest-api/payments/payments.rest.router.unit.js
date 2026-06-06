@@ -136,4 +136,15 @@ describe('#Payments-REST-Router', () => {
       assert.equal(result, true)
     })
   })
+  describe('#verifyStripePayment', () => {
+    it('should route traffic to the middleware and controller', async () => {
+      sandbox.stub(uut.validators, 'ensureUser').resolves()
+      sandbox.stub(uut.paymentRESTControllerLib, 'getPayment').resolves()
+      sandbox.stub(uut.paymentRESTControllerLib, 'verifyStripePayment').resolves()
+
+      const result = await uut.verifyStripePayment()
+
+      assert.equal(result, true)
+    })
+  })
 })
